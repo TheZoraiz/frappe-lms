@@ -36,6 +36,7 @@ declare module 'vue' {
     CollapseSidebar: typeof import('./src/components/Icons/CollapseSidebar.vue')['default']
     CourseCard: typeof import('./src/components/CourseCard.vue')['default']
     CourseCardOverlay: typeof import('./src/components/CourseCardOverlay.vue')['default']
+    CourseComments: typeof import('./src/components/CourseComments.vue')['default']
     CourseInstructors: typeof import('./src/components/CourseInstructors.vue')['default']
     CourseOutline: typeof import('./src/components/CourseOutline.vue')['default']
     CourseReviews: typeof import('./src/components/CourseReviews.vue')['default']
