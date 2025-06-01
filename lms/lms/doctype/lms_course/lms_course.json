@@ -51,7 +51,8 @@
   "statistics_section",
   "enrollments",
   "lessons",
-  "rating"
+  "rating",
+  "course_comments"
  ],
  "fields": [
   {
@@ -272,6 +273,13 @@
    "fieldtype": "Link",
    "label": "Evaluator",
    "options": "Course Evaluator"
+  },
+  {
+   "fieldname": "course_comments",
+   "fieldtype": "Table",
+   "label": "Courser Comments",
+   "options": "LMS Course Comment",
+   "read_only": 1
   }
  ],
  "is_published_field": "published",
@@ -290,7 +298,7 @@
   }
  ],
  "make_attachments_public": 1,
- "modified": "2025-05-29 12:38:01.002898",
+ "modified": "2025-06-01 20:26:05.842515",
  "modified_by": "Administrator",
  "module": "LMS",
  "name": "LMS Course",

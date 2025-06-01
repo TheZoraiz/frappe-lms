@@ -1493,3 +1493,36 @@ def update_meta_info(type, route, meta_tags):
 				print(new_tag)
 				new_tag.insert()
 				print(new_tag.as_dict())
+
+@frappe.whitelist(allow_guest=True)
+def get_course_comments(course):
+	comments = frappe.get_all(
+		"LMS Course Comment",
+		{"parent": course},
+		["comment_text", "comment_by", "creation"],
+		order_by="creation desc",
+	)
+
+	for comment in comments:
+		comment.owner_details = frappe.db.get_value(
+			"User", comment.comment_by, ["name", "username", "full_name", "user_image"], as_dict=True
+		)
+
+	return comments
+
+@frappe.whitelist()
+def create_course_comment(course, comment):
+	if not course or not comment:
+		frappe.throw(_("Course and comment are required"))
+
+	course_doc = frappe.get_doc("LMS Course", course)
+
+	# Append to child table
+	course_doc.append("course_comments", {
+		"comment_text": comment,
+		"comment_by": frappe.session.user,
+	})
+
+	course_doc.save()
+
+	return {"message": "Comment added", "course": course}
