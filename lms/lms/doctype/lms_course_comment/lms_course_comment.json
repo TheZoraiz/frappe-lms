@@ -6,7 +6,8 @@
  "engine": "InnoDB",
  "field_order": [
   "comment_text",
-  "comment_by"
+  "comment_by",
+  "reply_to"
  ],
  "fields": [
   {
@@ -23,13 +24,19 @@
    "label": "comment_by",
    "options": "User",
    "read_only": 1
+  },
+  {
+   "fieldname": "reply_to",
+   "fieldtype": "Link",
+   "label": "reply_to",
+   "options": "LMS Course Comment"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-06-01 20:12:56.267821",
+ "modified": "2025-06-03 22:15:09.437262",
  "modified_by": "Administrator",
  "module": "LMS",
  "name": "LMS Course Comment",

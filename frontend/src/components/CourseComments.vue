@@ -4,15 +4,62 @@
 
 		<div ref="commentsContainer" class="mb-4 flex flex-col gap-2 mt-4 max-h-[300px] overflow-y-auto">
 			<div v-for="(comment, index) in comments">
-				<span class="text-ink-gray-9 font-bold">{{ comment.owner_details?.full_name ?? 'Anonymous' }}</span>
-				<br />
-				<span
-					v-if="Boolean(comment.creation)"
-					class="text-ink-gray-5 text-sm"
+				<CourseSingleComment :comment="comment" />
+
+				<div class="flex items-center flex-wrap gap-2 mb-2">
+					<button
+						@click="replyTo = comment.name" 
+						:class="{'opacity-50': readOnlyMode}"
+						class="rounded text-ink-gray-7 hover:text-ink-gray-9 hover:border-ink-gray-9 border-2 p-1"
+					>
+						Reply
+					</button>
+					<button
+						v-if="comment.replies && comment.replies.length > 0"
+						@click="comment.showReplies = !comment.showReplies"
+						class="rounded text-ink-gray-7 hover:text-ink-gray-9 hover:border-ink-gray-9 border-2 p-1"
+					>
+						{{ comment.showReplies ? __(`Hide replies (${comment.replies.length})`) : __(`Show replies (${comment.replies.length})`) }}
+					</button>
+				</div>
+
+				<div v-if="replyTo === comment.name" class="pl-4">
+					<textarea
+						v-model="newReply" 
+						:disabled="readOnlyMode" 
+						placeholder="Write a reply..." 
+						class="p-2 mb-2 border rounded-md bg-transparent text-ink-gray-9 w-full"
+						@click="resetComment()"
+					></textarea>
+
+					<div class="flex justify-end mb-2">
+						<button 
+							@click="resetCommentReply()"
+							:disabled="readOnlyMode" 
+							class="rounded text-ink-gray-7 hover:text-ink-gray-9 hover:border-ink-gray-9 border-2 p-2 mr-2"
+						>
+							Cancel
+						</button>
+						<button 
+							@click="saveComment" 
+							:disabled="readOnlyMode || newReply.trim() === ''" 
+							:class="{'opacity-50': loading}"
+							class="rounded text-ink-white bg-surface-gray-7 hover:bg-surface-gray-6 p-2"
+						>
+							{{ loading ? 'Saving...' : 'Save' }}
+						</button>
+					</div>
+				</div>
+
+				<div
+					v-if="comment.replies && comment.replies.length > 0"
+					class="pl-4 mt-2 transition-all duration-300 ease-in-out"
+					:class="{'h-0 overflow-hidden': !comment.showReplies, 'h-auto': comment.showReplies}"
 				>
-					{{ dayjs(comment.creation).format('h:mm A - Do MMM, YYYY') }}
-				</span>
-				<p class="text-ink-gray-9 my-2" v-html="comment.comment_text.replace(/\n/g, '<br>')"></p>
+					<div v-for="reply in comment.replies" class="mt-2">
+						<CourseSingleComment :comment="reply" />
+					</div>
+				</div>
 
 				<hr v-if="index < (comments.length - 1)" class="border-outline-gray-2" />
 			</div>
@@ -22,7 +69,8 @@
 			v-model="newComment" 
 			:disabled="readOnlyMode" 
 			placeholder="Write a comment..." 
-			class="w-full p-2 m-2 border rounded-md bg-transparent text-ink-gray-9"
+			class="w-full p-2 mb-2 border rounded-md bg-transparent text-ink-gray-9"
+			@click="resetCommentReply()"
 		></textarea>
 
 		<div class="flex justify-end mt-2">
@@ -42,6 +90,7 @@
 import { ref, inject, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { call, toast } from 'frappe-ui'
+import CourseSingleComment from './CourseSingleComment.vue'
 
 const router = useRouter()
 const user = inject('$user')
@@ -56,20 +105,52 @@ const props = defineProps({
 })
 
 const newComment = ref('')
+const newReply = ref('')
+const replyTo = ref(null)
 const comments = ref([])
 const commentsContainer = ref(null)
 const loading = ref(false)
+
+const resetComment = () => {
+	newComment.value = ''
+}
+
+const resetCommentReply = () => {
+	newReply.value = ''
+	replyTo.value = null
+}
 
 const fetchComments = () => {
 	call('lms.lms.api.get_course_comments', {
 		course: props.course.data?.name,
 	}).then((r) => {
-		comments.value = r;
-		scrollToBottom()
+		comments.value = r.map(comment => {
+			if(comment.name !== replyTo.value)
+				comment.showReplies = false
+			else
+				comment.showReplies = true
+			return comment
+		})
+
+		if(replyTo.value) {
+			newReply.value = ''
+			replyTo.value = null
+
+		} else {
+			scrollToBottom()
+		}
 	})
 	.catch((err) => {
 		console.error(err)
 		toast.error(err?.data?.message ?? err?.message ?? 'Error getting comments')
+	})
+}
+
+const expandCommentReplies = (commentName) => {
+	comments.value.forEach(comment => {
+		if (comment.name === commentName) {
+			comment.showReplies = !comment.showReplies
+		}
 	})
 }
 
@@ -80,11 +161,13 @@ onMounted(() => {
 })
 
 function saveComment() {
-	if (newComment.value.trim()) {
+	if (newComment.value.trim() || newReply.value.trim()) {
 		loading.value = true
 		call('lms.lms.api.create_course_comment', {
 			course: props.course.data?.name,
-			comment: newComment.value.trim(),
+			comment: newComment.value.trim() || newReply.value.trim(),
+			reply_to: replyTo.value,
+
 		}).then((r) => {
 			console.log(r)
 			toast.success(r.message)

@@ -1494,34 +1494,54 @@ def update_meta_info(type, route, meta_tags):
 				new_tag.insert()
 				print(new_tag.as_dict())
 
+def get_user_by_name(name):
+	return frappe.db.get_value(
+		"User", name, ["name", "username", "full_name", "user_image", "user_type"], as_dict=True
+	)
+
 @frappe.whitelist(allow_guest=True)
 def get_course_comments(course):
 	comments = frappe.get_all(
 		"LMS Course Comment",
-		{"parent": course},
-		["comment_text", "comment_by", "creation"],
+		{"parent": course, "reply_to": None},
+		["name", "comment_text", "comment_by", "creation"],
 		order_by="creation desc",
 	)
 
 	for comment in comments:
-		comment.owner_details = frappe.db.get_value(
-			"User", comment.comment_by, ["name", "username", "full_name", "user_image"], as_dict=True
+		comment.owner_details = get_user_by_name(comment.comment_by)
+
+		comment.replies = []
+		replies = frappe.get_all(
+			"LMS Course Comment",
+			{"parent": course, "reply_to": comment.name},
+			["name", "comment_text", "comment_by", "creation"],
+			order_by="creation asc",
 		)
+		for reply in replies:
+			reply.owner_details = get_user_by_name(comment.comment_by)
+			comment.replies.append(reply)
 
 	return comments
 
 @frappe.whitelist()
-def create_course_comment(course, comment):
+def create_course_comment(course, comment, reply_to=None):
 	if not course or not comment:
 		frappe.throw(_("Course and comment are required"))
 
+
 	course_doc = frappe.get_doc("LMS Course", course)
 
-	# Append to child table
-	course_doc.append("course_comments", {
+	comment_data = {
 		"comment_text": comment,
 		"comment_by": frappe.session.user,
-	})
+	}
+
+	if reply_to:
+		comment_data["reply_to"] = reply_to
+
+	# Append to child table
+	course_doc.append("course_comments", comment_data)
 
 	course_doc.save()
 
