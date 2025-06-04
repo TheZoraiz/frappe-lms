@@ -1500,24 +1500,41 @@ def get_user_by_name(name):
 	)
 
 @frappe.whitelist(allow_guest=True)
-def get_course_comments(course):
-	comments = frappe.get_all(
-		"LMS Course Comment",
-		{"parent": course, "reply_to": None},
-		["name", "comment_text", "comment_by", "creation"],
-		order_by="creation desc",
-	)
+def get_course_comments(course=None, lesson=None):
+	comments = None
+	if course:
+		comments = frappe.get_all(
+			"LMS Course Comment",
+			{"parent": course, "parenttype": "LMS Course", "reply_to": None},
+			["name", "comment_text", "comment_by", "creation"],
+			order_by="creation desc",
+		)
+	elif lesson:
+		comments = frappe.get_all(
+			"LMS Course Comment",
+			{"parent": lesson, "parenttype": "Course Lesson", "reply_to": None},
+			["name", "comment_text", "comment_by", "creation"],
+			order_by="creation desc",
+		)
 
 	for comment in comments:
 		comment.owner_details = get_user_by_name(comment.comment_by)
 
 		comment.replies = []
-		replies = frappe.get_all(
-			"LMS Course Comment",
-			{"parent": course, "reply_to": comment.name},
-			["name", "comment_text", "comment_by", "creation"],
-			order_by="creation asc",
-		)
+		if(course):
+			replies = frappe.get_all(
+				"LMS Course Comment",
+				{"parent": course, "parenttype": "LMS Course", "reply_to": comment.name},
+				["name", "comment_text", "comment_by", "creation"],
+				order_by="creation asc",
+			)
+		elif(lesson):
+			replies = frappe.get_all(
+				"LMS Course Comment",
+				{"parent": lesson, "parenttype": "Course Lesson", "reply_to": comment.name},
+				["name", "comment_text", "comment_by", "creation"],
+				order_by="creation desc",
+			)
 		for reply in replies:
 			reply.owner_details = get_user_by_name(comment.comment_by)
 			comment.replies.append(reply)
@@ -1525,12 +1542,15 @@ def get_course_comments(course):
 	return comments
 
 @frappe.whitelist()
-def create_course_comment(course, comment, reply_to=None):
-	if not course or not comment:
-		frappe.throw(_("Course and comment are required"))
+def create_course_comment(comment, course=None, lesson=None, reply_to=None):
+	if (not course and not lesson) or not comment:
+		frappe.throw(_("Lesson/course and comment are required"))
 
-
-	course_doc = frappe.get_doc("LMS Course", course)
+	parent_doc = None
+	if(course):
+		parent_doc = frappe.get_doc("LMS Course", course)
+	elif(lesson):
+		parent_doc = frappe.get_doc("Course Lesson", lesson)
 
 	comment_data = {
 		"comment_text": comment,
@@ -1541,8 +1561,8 @@ def create_course_comment(course, comment, reply_to=None):
 		comment_data["reply_to"] = reply_to
 
 	# Append to child table
-	course_doc.append("course_comments", comment_data)
+	parent_doc.append("course_comments", comment_data)
 
-	course_doc.save()
+	parent_doc.save()
 
 	return {"message": "Comment added", "course": course}

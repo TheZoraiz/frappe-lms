@@ -29,7 +29,8 @@
   "column_break_15",
   "file_type",
   "column_break_syza",
-  "help"
+  "help",
+  "course_comments"
  ],
  "fields": [
   {
@@ -157,11 +158,17 @@
    "fieldtype": "Check",
    "label": "Is SCORM Package",
    "read_only": 1
+  },
+  {
+   "fieldname": "course_comments",
+   "fieldtype": "Table",
+   "label": "Courser Comments",
+   "options": "LMS Course Comment"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-04-10 15:19:22.400932",
+ "modified": "2025-06-04 22:07:03.604797",
  "modified_by": "Administrator",
  "module": "LMS",
  "name": "Course Lesson",

@@ -237,7 +237,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="sticky top-10">
+			<div class="sticky top-10 relative">
 				<div class="bg-surface-menu-bar py-5 px-2 border-b">
 					<div class="text-lg font-semibold text-ink-gray-9">
 						{{ lesson.data.course_title }}
@@ -259,6 +259,20 @@
 					:key="chapterNumber"
 					:getProgress="lesson.data.membership ? true : false"
 				/>
+
+				<div class="p-2 sticky top-[60px]">
+					<!-- <button
+						@click="showComments = !showComments" 
+						class="rounded text-ink-gray-7 hover:text-ink-gray-9 hover:border-ink-gray-9 border-2 p-1 mb-2"
+					>
+						Show Comments
+					</button> -->
+	
+					<CourseComments
+						:lesson="lesson"
+						class="bg-surface-white"
+					/>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -301,8 +315,9 @@ import LessonContent from '@/components/LessonContent.vue'
 import CourseInstructors from '@/components/CourseInstructors.vue'
 import ProgressBar from '@/components/ProgressBar.vue'
 import CertificationLinks from '@/components/CertificationLinks.vue'
+import CourseComments from '@/components/CourseComments.vue'
 
-const user = inject('$user')
+const user = inject('$user') 
 const router = useRouter()
 const route = useRoute()
 const allowDiscussions = ref(false)
@@ -314,6 +329,7 @@ const zenModeEnabled = ref(false)
 const hasQuiz = ref(false)
 const discussionsContainer = ref(null)
 const timer = ref(0)
+const showComments = ref(false)
 const { brand } = sessionStore()
 let timerInterval
 
@@ -784,3 +800,4 @@ usePageMeta(() => {
 	--plyr-video-control-background-hover: transparent;
 }
 </style>
+

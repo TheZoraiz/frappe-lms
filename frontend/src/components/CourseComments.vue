@@ -1,5 +1,5 @@
 <template>
-	<div class="border-2 rounded-md min-w-80 mb-4 p-5 sticky">
+	<div class="border-2 rounded-md mb-4 p-5 sticky">
 		<span class="font-medium text-ink-gray-9">Comments</span>
 
 		<div ref="commentsContainer" class="mb-4 flex flex-col gap-2 mt-4 max-h-[300px] overflow-y-auto">
@@ -87,7 +87,7 @@
 </template>
 
 <script setup>
-import { ref, inject, onMounted, nextTick } from 'vue'
+import { ref, inject, onMounted, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { call, toast } from 'frappe-ui'
 import CourseSingleComment from './CourseSingleComment.vue'
@@ -99,6 +99,10 @@ const readOnlyMode = window.read_only_mode
 
 const props = defineProps({
 	course: {
+		type: Object,
+		default: null,
+	},
+	lesson: {
 		type: Object,
 		default: null,
 	},
@@ -121,9 +125,18 @@ const resetCommentReply = () => {
 }
 
 const fetchComments = () => {
-	call('lms.lms.api.get_course_comments', {
-		course: props.course.data?.name,
-	}).then((r) => {
+	let payload = {};
+
+	if(props.lesson) {
+		payload = {
+			lesson: props.lesson.data.name,
+		}
+	} else {
+		payload = {
+			course: props.course.data?.name,
+		}
+	}
+	call('lms.lms.api.get_course_comments', payload).then((r) => {
 		comments.value = r.map(comment => {
 			if(comment.name !== replyTo.value)
 				comment.showReplies = false
@@ -155,20 +168,31 @@ const expandCommentReplies = (commentName) => {
 }
 
 onMounted(() => {
-	if (props.course) {
+	if (props.course || props.lesson) {
 		fetchComments();
 	}
 })
 
+watch(() => [props.course, props.lesson], () => {
+	comments.value = []
+	fetchComments();
+}, { deep: true })
+
 function saveComment() {
 	if (newComment.value.trim() || newReply.value.trim()) {
-		loading.value = true
-		call('lms.lms.api.create_course_comment', {
-			course: props.course.data?.name,
+		let payload = {
 			comment: newComment.value.trim() || newReply.value.trim(),
 			reply_to: replyTo.value,
+		}
 
-		}).then((r) => {
+		if(props.lesson) {
+			payload.lesson = props.lesson.data?.name
+		} else {
+			payload.course = props.course.data?.name
+		}
+
+		loading.value = true
+		call('lms.lms.api.create_course_comment', payload).then((r) => {
 			console.log(r)
 			toast.success(r.message)
 			newComment.value = ''
