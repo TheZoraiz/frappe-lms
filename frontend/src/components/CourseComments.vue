@@ -2,12 +2,17 @@
 	<div class="border-2 rounded-md mb-4 p-5 sticky">
 		<span class="font-medium text-ink-gray-9">Comments</span>
 
-		<div ref="commentsContainer" class="mb-4 flex flex-col gap-2 mt-4 max-h-[300px] overflow-y-auto">
+		<div ref="commentsContainer" class="my-4 flex flex-col gap-2 max-h-[300px] overflow-y-auto">
+			<div v-if="comments.length == 0" class="text-sm text-ink-gray-5">
+				No comments made.
+			</div>
+
 			<div v-for="(comment, index) in comments">
 				<CourseSingleComment :comment="comment" />
 
 				<div class="flex items-center flex-wrap gap-2 mb-2">
 					<button
+						v-if="Boolean(user?.data) && !user.data.is_student && !readOnlyMode"
 						@click="replyTo = comment.name" 
 						:class="{'opacity-50': readOnlyMode}"
 						class="rounded text-ink-gray-7 hover:text-ink-gray-9 hover:border-ink-gray-9 border-2 p-1"
@@ -23,7 +28,7 @@
 					</button>
 				</div>
 
-				<div v-if="replyTo === comment.name" class="pl-4">
+				<div v-if="replyTo === comment.name && Boolean(user?.data) && !user.data.is_student && !readOnlyMode" class="pl-4">
 					<textarea
 						v-model="newReply" 
 						:disabled="readOnlyMode" 
@@ -65,23 +70,25 @@
 			</div>
 		</div>
 
-		<textarea 
-			v-model="newComment" 
-			:disabled="readOnlyMode" 
-			placeholder="Write a comment..." 
-			class="w-full p-2 mb-2 border rounded-md bg-transparent text-ink-gray-9"
-			@click="resetCommentReply()"
-		></textarea>
-
-		<div class="flex justify-end mt-2">
-			<button 
-				@click="saveComment" 
-				:disabled="readOnlyMode || newComment.trim() === ''" 
-				:class="{'opacity-50': loading}"
-				class="rounded text-ink-white bg-surface-gray-7 hover:bg-surface-gray-6 p-2"
-			>
-				{{ loading ? 'Saving...' : 'Save' }}
-			</button>
+		<div v-if="Boolean(user?.data) && !user.data.is_student && !readOnlyMode">
+			<textarea
+				v-model="newComment" 
+				:disabled="readOnlyMode" 
+				placeholder="Write a comment..." 
+				class="w-full p-2 mb-2 border rounded-md bg-transparent text-ink-gray-9"
+				@click="resetCommentReply()"
+			></textarea>
+	
+			<div class="flex justify-end mt-2">
+				<button 
+					@click="saveComment" 
+					:disabled="readOnlyMode || newComment.trim() === ''" 
+					:class="{'opacity-50': loading}"
+					class="rounded text-ink-white bg-surface-gray-7 hover:bg-surface-gray-6 p-2"
+				>
+					{{ loading ? 'Saving...' : 'Save' }}
+				</button>
+			</div>
 		</div>
 	</div>
 </template>

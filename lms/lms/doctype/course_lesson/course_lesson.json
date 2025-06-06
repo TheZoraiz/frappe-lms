@@ -29,7 +29,6 @@
   "column_break_15",
   "file_type",
   "column_break_syza",
-  "help",
   "course_comments"
  ],
  "fields": [
@@ -70,10 +69,6 @@
    "fieldtype": "Markdown Editor",
    "ignore_xss_filter": 1,
    "label": "Body"
-  },
-  {
-   "fieldname": "help",
-   "fieldtype": "HTML"
   },
   {
    "fetch_from": "chapter.course",
@@ -168,7 +163,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-04 22:07:03.604797",
+ "modified": "2025-06-06 22:36:14.654901",
  "modified_by": "Administrator",
  "module": "LMS",
  "name": "Course Lesson",
@@ -213,6 +208,15 @@
    "select": 1,
    "share": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Batch Evaluator",
+   "share": 1
   }
  ],
  "row_format": "Dynamic",

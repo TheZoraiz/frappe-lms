@@ -1543,6 +1543,10 @@ def get_course_comments(course=None, lesson=None):
 
 @frappe.whitelist()
 def create_course_comment(comment, course=None, lesson=None, reply_to=None):
+	roles = frappe.get_roles(frappe.session.user)
+	if "LMS Student" in roles and "Course Creator" not in roles and "Moderator" not in roles and "Batch Evaluator" not in roles:
+		frappe.throw(_("You do not have permission to create a comment"))
+
 	if (not course and not lesson) or not comment:
 		frappe.throw(_("Lesson/course and comment are required"))
 
