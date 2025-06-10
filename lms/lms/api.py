@@ -1602,6 +1602,10 @@ def delete_course_comment(commentName, course=None, lesson=None):
 
 @frappe.whitelist()
 def resolve_course_comment(commentName):
+	roles = frappe.get_roles(frappe.session.user)
+	if "Moderator" not in roles:
+		frappe.throw(_("You do not have permission to resolve a comment"))
+
 	comment = frappe.get_doc("LMS Course Comment", commentName)
 
 	comment.resolved = True
