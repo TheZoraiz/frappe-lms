@@ -20,6 +20,22 @@
 						Reply
 					</button>
 					<button
+						v-if="!comment.resolved && Boolean(user?.data) && !user.data.is_student && !readOnlyMode"
+						@click="resolveComment(comment.name)" 
+						:class="{'opacity-50': readOnlyMode}"
+						class="rounded text-ink-gray-7 hover:text-ink-gray-9 hover:border-ink-gray-9 border-2 p-1"
+					>
+						Resolve
+					</button>
+					<button
+						v-if="Boolean(user?.data) && user.data.username == comment.owner_details.username && !readOnlyMode"
+						@click="deleteComment(comment.name)" 
+						:class="{'opacity-50': readOnlyMode}"
+						class="rounded text-ink-gray-7 hover:text-ink-gray-9 hover:border-ink-gray-9 border-2 p-1"
+					>
+						Delete
+					</button>
+					<button
 						v-if="comment.replies && comment.replies.length > 0"
 						@click="comment.showReplies = !comment.showReplies"
 						class="rounded text-ink-gray-7 hover:text-ink-gray-9 hover:border-ink-gray-9 border-2 p-1"
@@ -63,6 +79,25 @@
 				>
 					<div v-for="reply in comment.replies" class="mt-2">
 						<CourseSingleComment :comment="reply" />
+
+						<div class="flex items-center flex-wrap gap-2 mb-2">
+							<button
+								v-if="!reply.resolved && Boolean(user?.data) && !user.data.is_student && !readOnlyMode"
+								@click="resolveComment(reply.name)" 
+								:class="{'opacity-50': readOnlyMode}"
+								class="rounded text-ink-gray-7 hover:text-ink-gray-9 hover:border-ink-gray-9 border-2 p-1"
+							>
+								Resolve
+							</button>
+							<button
+								v-if="Boolean(user?.data) && user.data.username == reply.owner_details.username && !readOnlyMode"
+								@click="deleteComment(reply.name)" 
+								:class="{'opacity-50': readOnlyMode}"
+								class="rounded text-ink-gray-7 hover:text-ink-gray-9 hover:border-ink-gray-9 border-2 p-1"
+							>
+								Delete
+							</button>
+						</div>
 					</div>
 				</div>
 
@@ -212,6 +247,44 @@ function saveComment() {
 			loading.value = false
 		})
 	}
+}
+
+function deleteComment(commentName) {
+	if(!window.confirm('Are you sure you want to DELETE this comment?'))
+		return;
+
+	let payload = { commentName }
+
+	if(props.lesson) {
+		payload.lesson = props.lesson.data?.name
+	} else if(props.course) {
+		payload.course = props.course.data?.name
+	}
+
+	call('lms.lms.api.delete_course_comment', payload).then((r) => {
+		toast.success(r.message)
+		fetchComments();
+	})
+	.catch((err) => {
+		console.error(err)
+		toast.error(err?.data?.message ?? err?.message ?? 'Error deleting comment')
+	})
+}
+
+function resolveComment(commentName) {
+	if(!window.confirm('Are you sure you want to RESOLVE this comment?'))
+		return;
+
+	let payload = { commentName }
+
+	call('lms.lms.api.resolve_course_comment', payload).then((r) => {
+		toast.success(r.message)
+		fetchComments();
+	})
+	.catch((err) => {
+		console.error(err)
+		toast.error(err?.data?.message ?? err?.message ?? 'Error resolving comment')
+	})
 }
 
 function scrollToBottom() {

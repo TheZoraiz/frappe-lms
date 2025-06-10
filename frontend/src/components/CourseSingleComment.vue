@@ -4,7 +4,11 @@
       <UserAvatar :user="comment.owner_details" :size="'xl'" />
 
       <div>
-        <span class="text-ink-gray-9 font-bold">{{ comment.owner_details?.full_name ?? 'Anonymous' }}</span>
+        <span class="text-ink-gray-9 font-bold">
+          {{ comment.owner_details?.full_name ?? 'Anonymous' }}
+          {{ ' ' }}
+          <span v-if="comment.resolved" class="text-ink-green-2 font-normal">(Resolved)</span>
+        </span>
         <br />
         <span
           v-if="Boolean(comment.creation)"

@@ -269,6 +269,7 @@
 					</button> -->
 	
 					<CourseComments
+						v-if="Boolean(user?.data) && !user.data.is_student"
 						:lesson="lesson"
 						class="bg-surface-white"
 					/>
