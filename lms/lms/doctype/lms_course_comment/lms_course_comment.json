@@ -8,7 +8,8 @@
   "comment_text",
   "comment_by",
   "reply_to",
-  "resolved"
+  "resolved",
+  "block_id"
  ],
  "fields": [
   {
@@ -37,18 +38,35 @@
    "fieldname": "resolved",
    "fieldtype": "Check",
    "label": "resolved"
+  },
+  {
+   "fieldname": "block_id",
+   "fieldtype": "Text",
+   "label": "block_id"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
- "istable": 1,
  "links": [],
- "modified": "2025-06-10 21:26:05.848488",
+ "modified": "2025-06-12 22:05:50.145620",
  "modified_by": "Administrator",
  "module": "LMS",
  "name": "LMS Course Comment",
  "owner": "Administrator",
- "permissions": [],
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
  "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",

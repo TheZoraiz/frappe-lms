@@ -55,7 +55,7 @@ export class Upload {
 			})
 			app.mount(this.wrapper)
 			return
-		} else if (file.file_type == 'PDF') {
+		} else if (file.file_type == 'PDF' || file.file_type == 'HTML') {
 			this.wrapper.innerHTML = `<iframe src="${
 				window.location.origin
 			}${encodeURI(

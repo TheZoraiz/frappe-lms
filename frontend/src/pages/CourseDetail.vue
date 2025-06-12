@@ -67,11 +67,11 @@
 						</Badge>
 					</div>
 					<CourseCardOverlay :course="course" class="md:hidden mb-4" />
-					<CourseComments
+					<!-- <CourseComments
 						v-if="Boolean(user?.data) && !user.data.is_student"
 						:course="course"
 						class="min-w-80 md:hidden mb-4"
-					/>
+					/> -->
 					<div
 						v-html="course.data.description"
 						class="ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2 prose-sm max-w-none !whitespace-normal mt-10"
@@ -91,11 +91,11 @@
 				</div>
 				<div class="hidden md:block">
 					<CourseCardOverlay :course="course" />
-					<CourseComments
+					<!-- <CourseComments
 						v-if="Boolean(user?.data) && !user.data.is_student"
 						:course="course"
 						class="min-w-80 top-[60px] z-10"
-					/>
+					/> -->
 				</div>
 			</div>
 		</div>

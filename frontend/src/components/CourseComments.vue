@@ -1,5 +1,5 @@
 <template>
-	<div class="border-2 rounded-md mb-4 p-5 sticky">
+	<div class="border-2 rounded-md mb-4 p-5">
 		<span class="font-medium text-ink-gray-9">Comments</span>
 
 		<div ref="commentsContainer" class="my-4 flex flex-col gap-2 max-h-[300px] overflow-y-auto">
@@ -140,6 +140,10 @@ const dayjs = inject('$dayjs')
 const readOnlyMode = window.read_only_mode
 
 const props = defineProps({
+	block: {
+		type: String,
+		default: null,
+	},
 	course: {
 		type: Object,
 		default: null,
@@ -169,15 +173,14 @@ const resetCommentReply = () => {
 const fetchComments = () => {
 	let payload = {};
 
-	if(props.lesson) {
-		payload = {
-			lesson: props.lesson.data.name,
-		}
-	} else {
-		payload = {
-			course: props.course.data?.name,
-		}
+	if(props.block) {
+		payload.block = props.block
+	} else if(props.lesson) {
+		payload.lesson = props.lesson.data?.name
+	} else if(props.course) {
+		payload.course = props.course.data?.name
 	}
+
 	call('lms.lms.api.get_course_comments', payload).then((r) => {
 		comments.value = r.map(comment => {
 			if(comment.name !== replyTo.value)
@@ -210,12 +213,12 @@ const expandCommentReplies = (commentName) => {
 }
 
 onMounted(() => {
-	if (props.course || props.lesson) {
+	if (props.block || props.course || props.lesson) {
 		fetchComments();
 	}
 })
 
-watch(() => [props.course, props.lesson], () => {
+watch(() => [props.course, props.lesson, props.block], () => {
 	comments.value = []
 	fetchComments();
 }, { deep: true })
@@ -227,9 +230,11 @@ function saveComment() {
 			reply_to: replyTo.value,
 		}
 
-		if(props.lesson) {
+		if(props.block) {
+			payload.block = props.block
+		} else if(props.lesson) {
 			payload.lesson = props.lesson.data?.name
-		} else {
+		} else if(props.course) {
 			payload.course = props.course.data?.name
 		}
 
@@ -255,7 +260,9 @@ function deleteComment(commentName) {
 
 	let payload = { commentName }
 
-	if(props.lesson) {
+	if(props.block) {
+		payload.block = props.block
+	} else if(props.lesson) {
 		payload.lesson = props.lesson.data?.name
 	} else if(props.course) {
 		payload.course = props.course.data?.name

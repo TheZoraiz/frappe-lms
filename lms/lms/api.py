@@ -1500,7 +1500,7 @@ def get_user_by_name(name):
 	)
 
 @frappe.whitelist(allow_guest=True)
-def get_course_comments(course=None, lesson=None):
+def get_course_comments(course=None, lesson=None, block=None):
 	comments = None
 	if course:
 		comments = frappe.get_all(
@@ -1513,6 +1513,13 @@ def get_course_comments(course=None, lesson=None):
 		comments = frappe.get_all(
 			"LMS Course Comment",
 			{"parent": lesson, "parenttype": "Course Lesson", "reply_to": None},
+			["name", "comment_text", "comment_by", "resolved", "creation"],
+			order_by="creation asc",
+		)
+	elif block:
+		comments = frappe.get_all(
+			"LMS Course Comment",
+			{"block_id": block, "reply_to": None},
 			["name", "comment_text", "comment_by", "resolved", "creation"],
 			order_by="creation asc",
 		)
@@ -1535,6 +1542,13 @@ def get_course_comments(course=None, lesson=None):
 				["name", "comment_text", "comment_by", "reply_to", "resolved", "creation"],
 				order_by="creation asc",
 			)
+		elif(block):
+			replies = frappe.get_all(
+				"LMS Course Comment",
+				{"block_id": block, "reply_to": comment.name},
+				["name", "comment_text", "comment_by", "reply_to", "resolved", "creation"],
+				order_by="creation asc",
+			)
 		for reply in replies:
 			reply.owner_details = get_user_by_name(comment.comment_by)
 			comment.replies.append(reply)
@@ -1542,19 +1556,13 @@ def get_course_comments(course=None, lesson=None):
 	return comments
 
 @frappe.whitelist()
-def create_course_comment(comment, course=None, lesson=None, reply_to=None):
+def create_course_comment(comment, course=None, lesson=None, block=None, reply_to=None):
 	roles = frappe.get_roles(frappe.session.user)
 	if "LMS Student" in roles and "Course Creator" not in roles and "Moderator" not in roles and "Batch Evaluator" not in roles:
 		frappe.throw(_("You do not have permission to create a comment"))
 
-	if (not course and not lesson) or not comment:
-		frappe.throw(_("Lesson/course and comment are required"))
-
-	parent_doc = None
-	if(course):
-		parent_doc = frappe.get_doc("LMS Course", course)
-	elif(lesson):
-		parent_doc = frappe.get_doc("Course Lesson", lesson)
+	if (not course and not lesson and not block) or not comment:
+		frappe.throw(_("Invalid params"))
 
 	comment_data = {
 		"comment_text": comment,
@@ -1565,38 +1573,58 @@ def create_course_comment(comment, course=None, lesson=None, reply_to=None):
 	if reply_to:
 		comment_data["reply_to"] = reply_to
 
-	# Append to child table
-	parent_doc.append("course_comments", comment_data)
+	if(course or lesson):
+		# Append to child table
+		parent_doc = None
+		if(course):
+			parent_doc = frappe.get_doc("LMS Course", course)
+		elif(lesson):
+			parent_doc = frappe.get_doc("Course Lesson", lesson)
 
-	parent_doc.save()
+		parent_doc.append("course_comments", comment_data)
+
+	elif(block):
+		comment_data["block_id"] = block
+		comment = frappe.new_doc("LMS Course Comment")
+		comment.update(comment_data)
+		comment.insert()
+
+	else:
+		frappe.throw(_("Could not create comment"))
+
+	print(course, lesson)
+	if(course or lesson):
+		parent_doc.save()
 
 	return {"message": "Comment added", "course": course}
 
 @frappe.whitelist()
-def delete_course_comment(commentName, course=None, lesson=None):
+def delete_course_comment(commentName, block=None):
 	roles = frappe.get_roles(frappe.session.user)
 	if "LMS Student" in roles and "Course Creator" not in roles and "Moderator" not in roles and "Batch Evaluator" not in roles:
 		frappe.throw(_("You do not have permission to delete a comment"))
 
-	if not commentName or (not course and not lesson):
-		frappe.throw(_("Comment ID and lesson/course are required"))
+	if not commentName or not block:
+		frappe.throw(_("Comment ID and block are required"))
 
-	parent_doc = None
-	if course:
-		parent_doc = frappe.get_doc("LMS Course", course)
-	elif lesson:
-		parent_doc = frappe.get_doc("Course Lesson", lesson)
-
-	# Find and remove the comment from the child table
-	comments = parent_doc.get("course_comments")
-	comments = [comment for comment in comments if comment.name == commentName or comment.reply_to == commentName]
-
+	comments = frappe.get_all(
+		"LMS Course Comment",
+		{"block_id": block, "name": commentName},
+	)
 	if not comments:
 		frappe.throw(_("Comment not found"))
 
 	for comment in comments:
-		parent_doc.remove(comment)
-		parent_doc.save()
+		# Delete replies
+		replies = frappe.get_all(
+			"LMS Course Comment",
+			{"reply_to": comment.name},
+		)
+		for rep in replies:
+			frappe.delete_doc("LMS Course Comment", rep.name)
+
+		# Delete comment
+		frappe.delete_doc("LMS Course Comment", comment.name)
 
 	return {"message": "Comment deleted"}
 
@@ -1613,3 +1641,6 @@ def resolve_course_comment(commentName):
 
 	return {"message": "Comment resolved"}
 
+@frappe.whitelist()
+def get_unresolved_block_comments_count(block):
+	return frappe.db.count("LMS Course Comment", {"block_id": block, "resolved": 0})

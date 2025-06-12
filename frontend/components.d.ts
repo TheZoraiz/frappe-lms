@@ -27,6 +27,7 @@ declare module 'vue' {
     BatchOverlay: typeof import('./src/components/BatchOverlay.vue')['default']
     BatchStudentProgress: typeof import('./src/components/Modals/BatchStudentProgress.vue')['default']
     BatchStudents: typeof import('./src/components/BatchStudents.vue')['default']
+    BlockComments: typeof import('./src/components/BlockComments.vue')['default']
     BrandSettings: typeof import('./src/components/Settings/BrandSettings.vue')['default']
     BulkCertificates: typeof import('./src/components/Modals/BulkCertificates.vue')['default']
     Categories: typeof import('./src/components/Settings/Categories.vue')['default']
