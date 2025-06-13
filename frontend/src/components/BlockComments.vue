@@ -1,14 +1,17 @@
 <template>
 	<div
-		v-if="Boolean(user?.data) && !user.data.is_student"
+		ref="elBlock"
 		class="absolute not-prose"
+		v-if="Boolean(user?.data) && !user.data.is_student"
+		:class="unresolvedCount > 0 || showComments || elVisible ? 'block' : 'hidden'"
 		:style="{ top: blockTop, right: blockRight }"
 	>
 		<div
-			class="z-10 sticky cursor-pointer rounded bg-surface-white text-sm text-ink-gray-7 hover:text-ink-gray-9 hover:border-ink-gray-9 border-2 p-1"
+			style="background-image: url(https://static-00.iconduck.com/assets.00/comment-icon-1024x964-julk98bl.png);"
+			class="flex items-start justify-center z-10 sticky cursor-pointer rounded bg-surface-white text-sm font-bold text-black hover:text-ink-gray-9 hover:border-ink-gray-9 border-0 p-0 pt-[4px] bg-no-repeat bg-contain w-6 h-7"
 			@click="toggleComments"
 		>
-			{{ unresolvedCount > 0 ? `Comments (${unresolvedCount})` : 'Comments' }}
+			{{ unresolvedCount > 0 ? `+` : '' }}
 		</div>
 
 		<div class="relative bg-surface-gray-1" v-if="showComments">
@@ -33,8 +36,10 @@ const user = inject('$user')
 const blockEl = ref(null)
 const blockTop = ref('auto')
 const blockRight = ref('auto')
+const elVisible = ref(false)
 const showComments = ref(false)
 const unresolvedCount = ref(0)
+const elBlock = ref(null)
 
 const props = defineProps({
 	block: {
@@ -50,6 +55,28 @@ const alignWithBlock = async () => {
 		await sleep(100)
 		blockEl.value = document.querySelector(`[data-id="${props.block}"]`)
 	}
+
+	blockEl.value.addEventListener('mouseover', (e) => {
+		elVisible.value = blockEl.value.contains(e.target)
+	})
+	blockEl.value.addEventListener('mouseout', (e) => {
+		if(!elBlock.value.contains(e.target))
+			elVisible.value = false
+	})
+	elBlock.value.addEventListener('mouseover', (e) => {
+		elVisible.value = elBlock.value.contains(e.target)
+	})
+	elBlock.value.addEventListener('mouseout', (e) => {
+		if(!blockEl.value.contains(e.target))
+			elVisible.value = false
+	})
+
+	const anchors = blockEl.value.querySelectorAll('a')
+	anchors.forEach(anchor => {
+		if (anchor.target !== '_blank') {
+			anchor.target = '_blank'
+		}
+	})
 
 	while (true) {
 		await sleep(30)

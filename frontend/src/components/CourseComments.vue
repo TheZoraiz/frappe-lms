@@ -240,7 +240,6 @@ function saveComment() {
 
 		loading.value = true
 		call('lms.lms.api.create_course_comment', payload).then((r) => {
-			console.log(r)
 			toast.success(r.message)
 			newComment.value = ''
 			fetchComments();

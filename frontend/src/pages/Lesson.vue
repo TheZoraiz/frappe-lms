@@ -230,7 +230,82 @@
 							:quizId="lesson.data.quiz_id"
 						/>
 					</div>
-					<div class="mt-20" ref="discussionsContainer">
+
+					<div class="flex justify-end items-center space-x-2 mt-20">
+						<Button v-if="zenModeEnabled" @click="showDiscussionsInZenMode()">
+							<template #icon>
+								<MessageCircleQuestion class="w-4 h-4 stroke-1.5" />
+							</template>
+						</Button>
+						<router-link
+							v-if="lesson.data.prev"
+							:to="{
+								name: 'Lesson',
+								params: {
+									courseName: courseName,
+									chapterNumber: lesson.data.prev.split('.')[0],
+									lessonNumber: lesson.data.prev.split('.')[1],
+								},
+							}"
+						>
+							<Button>
+								<template #prefix>
+									<ChevronLeft class="w-4 h-4 stroke-1" />
+								</template>
+								<span>
+									{{ __('Previous') }}
+								</span>
+							</Button>
+						</router-link>
+						<router-link
+							v-if="allowEdit()"
+							:to="{
+								name: 'LessonForm',
+								params: {
+									courseName: courseName,
+									chapterNumber: props.chapterNumber,
+									lessonNumber: props.lessonNumber,
+								},
+							}"
+						>
+							<Button>
+								{{ __('Edit') }}
+							</Button>
+						</router-link>
+						<router-link
+							v-if="lesson.data.next"
+							:to="{
+								name: 'Lesson',
+								params: {
+									courseName: courseName,
+									chapterNumber: lesson.data.next.split('.')[0],
+									lessonNumber: lesson.data.next.split('.')[1],
+								},
+							}"
+						>
+							<Button>
+								<template #suffix>
+									<ChevronRight class="w-4 h-4 stroke-1" />
+								</template>
+								<span>
+									{{ __('Next') }}
+								</span>
+							</Button>
+						</router-link>
+						<router-link
+							v-else
+							:to="{
+								name: 'CourseDetail',
+								params: { courseName: courseName },
+							}"
+						>
+							<Button>
+								{{ __('Back to Course') }}
+							</Button>
+						</router-link>
+					</div>
+
+					<div class="mt-6" ref="discussionsContainer">
 						<Discussions
 							v-if="allowDiscussions"
 							:title="'Questions'"
