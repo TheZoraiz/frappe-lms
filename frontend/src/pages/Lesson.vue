@@ -751,6 +751,10 @@ usePageMeta(() => {
 	display: none;
 }
 
+.ce-block {
+	padding-right: 25px;
+}
+
 .ce-block__content {
 	max-width: unset;
 }
