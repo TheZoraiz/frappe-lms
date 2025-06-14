@@ -1231,9 +1231,8 @@ def get_course_outline(course, progress=False):
 	"""Returns the course outline."""
 	outline = []
 	chapters = frappe.get_all(
-		"Chapter Reference", {"parent": course}, ["chapter", "idx"], order_by="creation"
+		"Chapter Reference", {"parent": course}, ["chapter", "idx"], order_by="creation asc"
 	)
-	chapters = sorted(chapters, key=lambda x: x.creation)
 	for chapter in chapters:
 		chapter_details = frappe.db.get_value(
 			"Course Chapter",
