@@ -1233,13 +1233,13 @@ def get_course_outline(course, progress=False):
 	chapters = frappe.get_all(
 		"Chapter Reference", {"parent": course}, ["chapter", "idx"], order_by="creation"
 	)
+	chapters = sorted(chapters, key=lambda x: x.creation)
 	for chapter in chapters:
 		chapter_details = frappe.db.get_value(
 			"Course Chapter",
 			chapter.chapter,
 			["name", "title", "is_scorm_package", "launch_file", "scorm_package"],
 			as_dict=True,
-			order_by="creation",
 		)
 		chapter_details["idx"] = chapter.idx
 		chapter_details.lessons = get_lessons(course, chapter_details, progress=progress)
