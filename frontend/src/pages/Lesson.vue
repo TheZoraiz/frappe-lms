@@ -566,12 +566,47 @@ watch(
 	}
 )
 
+const scrollLessonToTop = () => {
+	let lessonScrollContainer = document.getElementById('scrollContainer');
+	if(lessonScrollContainer)
+		lessonScrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const handleBlocksAnchorBlank = (blocks) => {
+	blocks?.forEach(async(block) => {
+		let blockEl;
+
+		while (!blockEl) {
+			await sleep(100)
+			blockEl = document.querySelector(`[data-id="${block.id}"]`)
+		}
+
+		const anchors = blockEl.querySelectorAll('a')
+
+		anchors.forEach(anchor => {
+			if (anchor.target !== '_blank') {
+				anchor.target = '_blank'
+			}
+		})
+	})
+}
+
 watch(
 	() => lesson.data,
 	(data) => {
 		lessonBlocks.value = JSON.parse(data.content)?.blocks ?? []
 		setupLesson(data)
 		enablePlyr()
+		scrollLessonToTop()
+	}
+)
+
+watch(
+	() => lessonBlocks.value,
+	(blocks) => {
+		handleBlocksAnchorBlank(blocks)
 	}
 )
 

@@ -2,9 +2,11 @@
 	<div
 		ref="elBlock"
 		class="absolute not-prose"
+		:data-block-comment="props.block"
 		v-if="Boolean(user?.data) && !user.data.is_student"
 		:class="unresolvedCount > 0 || showComments || elVisible ? 'block' : 'hidden'"
 		:style="{ top: blockTop, right: blockRight }"
+		:key="props.block"
 	>
 		<div
 			style="background-image: url(https://static-00.iconduck.com/assets.00/comment-icon-1024x964-julk98bl.png);"
@@ -51,31 +53,27 @@ const props = defineProps({
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const alignWithBlock = async () => {
-	while (!blockEl.value) {
+	let started = false;
+
+	while (!started || !blockEl.value) {
+		started = true
 		await sleep(100)
 		blockEl.value = document.querySelector(`[data-id="${props.block}"]`)
 	}
 
-	blockEl.value.addEventListener('mouseover', (e) => {
+	blockEl.value.addEventListener?.('mouseover', (e) => {
 		elVisible.value = blockEl.value.contains(e.target)
 	})
-	blockEl.value.addEventListener('mouseout', (e) => {
+	blockEl.value.addEventListener?.('mouseout', (e) => {
 		if(!elBlock.value.contains(e.target))
 			elVisible.value = false
 	})
-	elBlock.value.addEventListener('mouseover', (e) => {
+	elBlock.value?.addEventListener?.('mouseover', (e) => {
 		elVisible.value = elBlock.value.contains(e.target)
 	})
-	elBlock.value.addEventListener('mouseout', (e) => {
+	elBlock.value?.addEventListener?.('mouseout', (e) => {
 		if(!blockEl.value.contains(e.target))
 			elVisible.value = false
-	})
-
-	const anchors = blockEl.value.querySelectorAll('a')
-	anchors.forEach(anchor => {
-		if (anchor.target !== '_blank') {
-			anchor.target = '_blank'
-		}
 	})
 
 	while (true) {
@@ -99,19 +97,13 @@ const toggleComments = () => {
 	}
 }
 
-onMounted(() => {
-	alignWithBlock()
-	fetchUnresolvedCount()
-	window.addEventListener('resize', alignWithBlock)
-})
-
 watch(
-	() => blockEl.value,
+	() => props.block,
 	() => {
 		alignWithBlock()
 		fetchUnresolvedCount()
-	}
+	},
+	{ deep: true, immediate: true }
 )
 
 </script>
-
