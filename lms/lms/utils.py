@@ -1239,6 +1239,7 @@ def get_course_outline(course, progress=False):
 			chapter.chapter,
 			["name", "title", "is_scorm_package", "launch_file", "scorm_package"],
 			as_dict=True,
+			order_by="creation",
 		)
 		chapter_details["idx"] = chapter.idx
 		chapter_details.lessons = get_lessons(course, chapter_details, progress=progress)
