@@ -133,7 +133,7 @@ def get_lessons(course, chapter=None, get_details=True, progress=False):
 def get_lesson_details(chapter, progress=False):
 	lessons = []
 	lesson_list = frappe.get_all(
-		"Lesson Reference", {"parent": chapter.name}, ["lesson", "idx"], order_by="creation"
+		"Lesson Reference", {"parent": chapter.name}, ["lesson", "idx"], order_by="idx"
 	)
 	for row in lesson_list:
 		lesson_details = frappe.db.get_value(
@@ -1231,7 +1231,7 @@ def get_course_outline(course, progress=False):
 	"""Returns the course outline."""
 	outline = []
 	chapters = frappe.get_all(
-		"Chapter Reference", {"parent": course}, ["chapter", "idx"], order_by="creation asc"
+		"Chapter Reference", {"parent": course}, ["chapter", "idx"], order_by="idx"
 	)
 	for chapter in chapters:
 		chapter_details = frappe.db.get_value(
