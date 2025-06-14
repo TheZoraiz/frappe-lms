@@ -162,7 +162,7 @@ def get_lesson_details(chapter, progress=False):
 			lesson_details.is_complete = get_progress(lesson_details.course, lesson_details.name)
 
 		lessons.append(lesson_details)
-	return lessons
+	return sorted(lessons, key=lambda x: x.creation)
 
 
 def get_lesson_icon(body, content):
