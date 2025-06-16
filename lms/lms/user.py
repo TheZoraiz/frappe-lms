@@ -24,7 +24,7 @@ def after_insert(doc, method):
 
 
 @frappe.whitelist(allow_guest=True)
-def sign_up(email, full_name, verify_terms, user_category):
+def sign_up(email, full_name, verify_terms, user_category, country):
 	if is_signup_disabled():
 		frappe.throw(_("Sign Up is disabled"), _("Not Allowed"))
 
@@ -51,10 +51,10 @@ def sign_up(email, full_name, verify_terms, user_category):
 			"first_name": escape_html(full_name),
 			"verify_terms": verify_terms,
 			"user_category": user_category,
-			"country": "",
 			"enabled": 1,
 			"new_password": random_string(10),
 			"user_type": "Website User",
+			"country": country
 		}
 	)
 	user.flags.ignore_permissions = True
@@ -67,7 +67,7 @@ def sign_up(email, full_name, verify_terms, user_category):
 		user.add_roles(default_role)
 
 	user.add_roles("LMS Student")
-	set_country_from_ip(None, user.name)
+	# set_country_from_ip(None, user.name)
 
 	if user.flags.email_sent:
 		return 1, _("Please check your email for verification")

@@ -641,7 +641,7 @@ const checkIfDiscussionsAllowed = () => {
 
 const allowEdit = () => {
 	if (window.read_only_mode) return false
-	if (user.data?.is_moderator) return true
+	if (user.data?.is_system_manager) return true
 	if (lesson.data?.instructors?.includes(user.data?.name)) return true
 	return false
 }

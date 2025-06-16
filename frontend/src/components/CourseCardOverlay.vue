@@ -77,7 +77,7 @@
 					{{ __('Get Certificate') }}
 				</Button>
 				<router-link
-					v-if="user?.data?.is_moderator || is_instructor()"
+					v-if="user?.data?.is_system_manager || is_instructor()"
 					:to="{
 						name: 'CourseForm',
 						params: {
