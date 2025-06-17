@@ -1550,7 +1550,7 @@ def get_course_comments(course=None, lesson=None, block=None):
 				order_by="creation asc",
 			)
 		for reply in replies:
-			reply.owner_details = get_user_by_name(comment.comment_by)
+			reply.owner_details = get_user_by_name(reply.comment_by)
 			comment.replies.append(reply)
 
 	return comments
@@ -1587,12 +1587,11 @@ def create_course_comment(comment, course=None, lesson=None, block=None, reply_t
 		comment_data["block_id"] = block
 		comment = frappe.new_doc("LMS Course Comment")
 		comment.update(comment_data)
-		comment.insert()
+		comment.insert(ignore_permissions=True)
 
 	else:
 		frappe.throw(_("Could not create comment"))
 
-	print(course, lesson)
 	if(course or lesson):
 		parent_doc.save()
 
@@ -1621,10 +1620,10 @@ def delete_course_comment(commentName, block=None):
 			{"reply_to": comment.name},
 		)
 		for rep in replies:
-			frappe.delete_doc("LMS Course Comment", rep.name)
+			frappe.delete_doc("LMS Course Comment", rep.name, ignore_permissions=True)
 
 		# Delete comment
-		frappe.delete_doc("LMS Course Comment", comment.name)
+		frappe.delete_doc("LMS Course Comment", comment.name, ignore_permissions=True)
 
 	return {"message": "Comment deleted"}
 
@@ -1637,7 +1636,7 @@ def resolve_course_comment(commentName):
 	comment = frappe.get_doc("LMS Course Comment", commentName)
 
 	comment.resolved = True
-	comment.save()
+	comment.save(ignore_permissions=True)
 
 	return {"message": "Comment resolved"}
 
