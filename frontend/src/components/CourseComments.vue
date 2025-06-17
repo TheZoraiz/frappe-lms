@@ -20,7 +20,7 @@
 						Reply
 					</button>
 					<button
-						v-if="!comment.resolved && Boolean(user?.data) && user.data.is_moderator && !readOnlyMode"
+						v-if="!comment.resolved && Boolean(user?.data) && user.data.is_system_manager && !readOnlyMode"
 						@click="resolveComment(comment.name)" 
 						:class="{'opacity-50': readOnlyMode}"
 						class="rounded text-ink-gray-7 hover:text-ink-gray-9 hover:border-ink-gray-9 border-2 p-1"
@@ -28,7 +28,7 @@
 						Resolve
 					</button>
 					<button
-						v-if="Boolean(user?.data) && user.data.username == comment.owner_details.username && !readOnlyMode"
+						v-if="Boolean(user?.data) && (user.data.username == comment.owner_details.username || user.data.is_system_manager) && !readOnlyMode"
 						@click="deleteComment(comment.name)" 
 						:class="{'opacity-50': readOnlyMode}"
 						class="rounded text-ink-gray-7 hover:text-ink-gray-9 hover:border-ink-gray-9 border-2 p-1"
@@ -82,7 +82,7 @@
 
 						<div class="flex items-center flex-wrap gap-2 mb-2">
 							<button
-								v-if="!reply.resolved && Boolean(user?.data) && user.data.is_moderator && !readOnlyMode"
+								v-if="!reply.resolved && Boolean(user?.data) && user.data.is_system_manager && !readOnlyMode"
 								@click="resolveComment(reply.name)" 
 								:class="{'opacity-50': readOnlyMode}"
 								class="rounded text-ink-gray-7 hover:text-ink-gray-9 hover:border-ink-gray-9 border-2 p-1"
@@ -90,7 +90,7 @@
 								Resolve
 							</button>
 							<button
-								v-if="Boolean(user?.data) && user.data.username == reply.owner_details.username && !readOnlyMode"
+								v-if="Boolean(user?.data) && (user.data.username == reply.owner_details.username || user.data.is_system_manager) && !readOnlyMode"
 								@click="deleteComment(reply.name)" 
 								:class="{'opacity-50': readOnlyMode}"
 								class="rounded text-ink-gray-7 hover:text-ink-gray-9 hover:border-ink-gray-9 border-2 p-1"
