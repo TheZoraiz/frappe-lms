@@ -9,7 +9,7 @@
 		:key="props.block"
 	>
 		<div
-			style="background-image: url(https://static-00.iconduck.com/assets.00/comment-icon-1024x964-julk98bl.png);"
+			style="background-image: url(/assets/lms/images/comment-icon.svg);"
 			class="flex items-start justify-center z-10 sticky cursor-pointer rounded bg-surface-white text-sm font-bold text-black hover:text-ink-gray-9 hover:border-ink-gray-9 border-0 p-0 pt-[4px] bg-no-repeat bg-contain w-6 h-7"
 			@click="toggleComments"
 		>
